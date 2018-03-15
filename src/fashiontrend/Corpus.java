@@ -24,7 +24,7 @@ public class Corpus {
 	
 	int nUsers = 0; // Number of users
 	int nItems = 0; // Number of users
-	int nVotes; // Number of ratings
+	int nVotes = 0; // Number of ratings
 	Map<String, Integer> itemIds = new HashMap<String, Integer>(); // Maps an item's string-valued ID to an integer
 	
 	public void loadData(String reviewPath, String imgFeatPath, int userMin, int itemMin) throws IOException 
@@ -32,7 +32,10 @@ public class Corpus {
 		System.out.println("Inside loadData() in Corpus");
 		
 		loadVotes(reviewPath, imgFeatPath, userMin, itemMin);
-		//loadImgFeatures(imgFeatPath);
+		loadImgFeatures(imgFeatPath);
+		
+		System.out.printf("nUsers = %d nItems = %d nVotes = %d", nUsers, nItems, nVotes );
+		System.out.println();
 	}
 	
 	private void loadVotes(String reviewPath, String imgFeatPath, int userMin, int itemMin) throws IOException 
@@ -43,7 +46,7 @@ public class Corpus {
  	    
  	        
 	    try {
-	    	System.out.println("Reading file : " + imgFeatPath);
+	    	
 	    	  File imageFile = new File(imgFeatPath);
 		      DataInputStream dis = new DataInputStream(new FileInputStream(imageFile)); //to read the file
 		      byte[] b = new byte[(int)imageFile.length()]; //to store the bytes
@@ -125,14 +128,14 @@ public class Corpus {
 		}
 		
 		while ((line = br.readLine()) != null) {
-			System.out.println(line);
+			//System.out.println(line);
 			Object[] token = line.split(" ");
 			uName = (String)token[0];
 			bName = (String)token[1];
 	        value = Float.valueOf((String)token[2]);
-	        System.out.print(uName + " ");
-	        System.out.print(bName + " ");
-	        System.out.println(value);
+	        //System.out.print(uName + " ");
+	        //System.out.print(bName + " ");
+	        //System.out.println(value);
 	        
 	        nRead++;
 	        
@@ -184,16 +187,16 @@ public class Corpus {
 			}
 			
 			while ((line = br2.readLine()) != null) {
-				System.out.println(line);
+				//System.out.println(line);
 				Object[] token = line.split(" ");
 				uName = (String)token[0];
 				bName = (String)token[1];
 		        value = Float.valueOf((String)token[2]);
 		        voteTime = Long.valueOf((String)token[3]);
-		        System.out.print(uName + " ");
-		        System.out.print(bName + " ");
-		        System.out.print(value + " ");
-		        System.out.println(voteTime + " ");
+		        //System.out.print(uName + " ");
+		        //System.out.print(bName + " ");
+		        //System.out.print(value + " ");
+		        //System.out.println(voteTime + " ");
 		        
 		        nRead++;
 		        
@@ -207,7 +210,7 @@ public class Corpus {
 		        
 		        if (uCounts != null && bCounts != null) {
 		        if (uCounts.get(uName) < userMin || bCounts.get(bName) < itemMin) {
-		        	System.out.println("inside ok");
+		        	//System.out.println("inside ok");
 		        	//continue;  // Do we need this continue statement
 		        }
 		        }
@@ -261,7 +264,7 @@ public class Corpus {
 		System.out.println("Inside generateVotes() in Corpus");
 		
 		for (Map.Entry<Pair<Integer, Integer>, Long> entry : voteMap.entrySet()) {
-            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+            //System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
             Vote v = new Vote();
 			v.setUser(entry.getKey().getKey());
 			v.setItem(entry.getKey().getValue());
@@ -288,7 +291,7 @@ public class Corpus {
 		double ma = 58.388599; // Largest feature observed
 		
 		try {
-	    	System.out.println("Reading file : " + imgFeatPath);
+	    	  
 	    	  File imageFile = new File(imgFeatPath);
 		      DataInputStream dis = new DataInputStream(new FileInputStream(imageFile)); //to read the file
 		      byte[] b = new byte[(int)imageFile.length()]; //to store the bytes
