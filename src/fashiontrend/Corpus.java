@@ -26,6 +26,7 @@ public class Corpus {
 	int nItems = 0; // Number of users
 	int nVotes = 0; // Number of ratings
 	Map<String, Integer> itemIds = new HashMap<String, Integer>(); // Maps an item's string-valued ID to an integer
+	int imFeatureDim = 4096;
 	
 	public void loadData(String reviewPath, String imgFeatPath, int userMin, int itemMin) throws IOException 
 	{
@@ -144,7 +145,7 @@ public class Corpus {
 			}
 	        
 	        if (!imgAsins.containsKey(bName)) {
-				//continue;  // Do we need this continue statement
+				continue;  // Do we need this continue statement
 			}
 	        
 	        if (value > 5 || value < 0) { // Ratings should be in the range [0,5]
@@ -205,13 +206,12 @@ public class Corpus {
 				}
 		        
 		        if (!imgAsins.containsKey(bName)) {
-					//continue;  // Do we need this continue statement
+					continue;
 				}
 		        
 		        if (uCounts != null && bCounts != null) {
 		        if (uCounts.get(uName) < userMin || bCounts.get(bName) < itemMin) {
-		        	//System.out.println("inside ok");
-		        	//continue;  // Do we need this continue statement
+		        	continue;
 		        }
 		        }
 		    	
@@ -227,10 +227,6 @@ public class Corpus {
 				if (!userIds.containsKey(uName)) {
 					rUserIds.put(nUsers, uName);
 					userIds.put(uName, nUsers++);
-				}
-				
-				if(itemIds.containsKey(bName)) {
-					
 				}
 				
 				
@@ -274,8 +270,7 @@ public class Corpus {
         }
 		
 		nVotes = V.size();
-		Collections.shuffle(V);
-					
+		Collections.shuffle(V);			
 	}
 	
 	private void loadImgFeatures(String imgFeatPath) 
@@ -299,8 +294,10 @@ public class Corpus {
 		      System.out.println("Length = " + l);
 		      int counter = 0;
 		      
-		      byte[] temp = new byte[10];		      
+		      byte[] temp = new byte[10];
+		      float[] feat = new float[imFeatureDim];
 		      
+		      while(dis.available() >0 ) {
 		      for (int i=0;i<b.length; i++) {
 		    	  
 		    	  if(b[i] == 66) {
@@ -313,16 +310,17 @@ public class Corpus {
 		    			  
 		    			  if (checkAscii(temp)) {
 		    				  if (!itemIds.containsKey(new String(temp))) {
-		    					 // continue; // How does it work?
-		    					/*  Vector<Pair<Integer, Float>> vec = imageFeatures.at(itemIds.get(new String(temp)));
+		    					  continue;	
+		    				  } else {
+		    					    Vector<Pair<Integer, Float>> vec = imageFeatures.elementAt(itemIds.get(new String(temp)));
 		    						for (int f = 0; f < imFeatureDim; f ++) {
-		    							if (feat[f] != 0) {  // compression
+		    							if (feat[f] != 0) { //@@@@ TODO read data in feat[f]
+		    								System.out.println("feat fffffff");
 		    								vec.add(new Pair(f, feat[f]/ma));
 		    							}
-		    						} */
-		    					 
-		    						counter++;
+		    						} 
 		    				  }
+		    				  counter++;
 		    			  }
 		    		  }
 		    	  }
@@ -337,15 +335,16 @@ public class Corpus {
 		    			  
 		    			  if (checkISBN(temp)) {
 		    				  if (!itemIds.containsKey(new String(temp))) {
-			    					 // continue; // How does it work?
-		    					  counter++;
+			    					 continue;
+		    					  
 			    			}
+		    				  counter++;	 
 		    		  }
 		    			  
 		    	  }
 		    	 
-		    	  
 		      }
+		}
 		      System.out.println("Count = " + counter);
 		      
 		      
