@@ -297,7 +297,7 @@ public class Corpus {
 		      byte[] temp = new byte[10];
 		      float[] feat = new float[imFeatureDim];
 		      
-		      while(dis.available() >0 ) {
+		     // while(dis.available() >0 ) {
 		      for (int i=0;i<b.length; i++) {
 		    	  
 		    	  if(b[i] == 66) {
@@ -344,7 +344,7 @@ public class Corpus {
 		    	  }
 		    	 
 		      }
-		}
+		//}
 		      System.out.println("Count = " + counter);
 		      
 		      
