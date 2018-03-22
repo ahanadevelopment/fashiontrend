@@ -37,7 +37,10 @@ public class Main {
 			imgFeatPath = args[1];
 			k = Integer.parseInt(args[2]);
 			k2 = Integer.parseInt(args[3]);
-			alpha = Double.parseDouble(args[4]);
+			System.out.print(args[4]);
+			if(args[4] == "na") {
+				alpha = Double.parseDouble(args[4]);
+			}
 			biasReg = Double.parseDouble(args[5]);
 			lambda = Double.parseDouble(args[6]);
 			lambda2 = Double.parseDouble(args[7]);

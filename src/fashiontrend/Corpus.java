@@ -27,7 +27,17 @@ public class Corpus {
 	int nVotes = 0; // Number of ratings
 	Map<String, Integer> itemIds = new HashMap<String, Integer>(); // Maps an item's string-valued ID to an integer
 	int imFeatureDim = 4096;
+	//Pair<Integer, Long>[] val_per_user = (Pair<Integer, Long>[])new Pair[nUsers];
+	Pair<Integer, Long>[] val_per_user;
 	
+	public Pair<Integer, Long>[] getVal_per_user() {
+		return val_per_user;
+	}
+
+	public void setVal_per_user(int nusers) {
+		this.val_per_user = (Pair<Integer, Long>[])new Pair[nusers];
+	}
+
 	public void loadData(String reviewPath, String imgFeatPath, int userMin, int itemMin) throws IOException 
 	{
 		System.out.println("Inside loadData() in Corpus");

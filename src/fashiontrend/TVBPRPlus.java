@@ -7,6 +7,7 @@ public class TVBPRPlus {
 	{
 		System.out.println("Inside TVBPRPlus constructor");
 		new TVBPR(corpus, k, k2, lambda, lambda2, biasReg, nEpoch);
+		System.out.println("TVBPRPlus constructor Done");
 		
 	}
 
