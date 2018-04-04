@@ -1,6 +1,5 @@
 package fashiontrend;
 
-import java.io.IOException;
 
 public class TVBPR {
 

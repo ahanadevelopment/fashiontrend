@@ -12,6 +12,14 @@ public class TVBPRPlus {
 	}
 
 	public void init(String corp_name) {
+		System.out.println("Inside init method in TVBPRPlus class");
+		Model.loadCategories("C:\\Users\\udas3\\Documents\\thesisLibrary\\productMeta_simple.txt.gz", corp_name, "root", false);
+		
+		System.out.println("Init method in TVBPRPlus class Done");
+	}
+
+	public void saveModel(String string) {
+		
 		
 	}
 

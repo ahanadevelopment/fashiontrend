@@ -58,6 +58,7 @@ public class Main {
 		
 		TVBPRPlus md = new TVBPRPlus(corpus, k, k2, lambda, lambda2, biasReg, nEpoch, iter, corp_name);
 		md.init(corp_name);
+		md.saveModel((corp_name + "__" + md.toString() + ".txt"));
 
 	}
 

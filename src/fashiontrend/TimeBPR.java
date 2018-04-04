@@ -77,7 +77,7 @@ public class TimeBPR {
 				
 				
 				// init DP
-				memo = new double*** [nBin];
+			/*	memo = new double*** [nBin];
 				sol = new int*** [nBin];
 				for (int i = 0; i < nBin; i ++) {
 					memo[i] = new double** [nBin];
@@ -90,7 +90,7 @@ public class TimeBPR {
 							sol[i][j][k] = new int[nEpoch];
 						}
 					}
-				}
+				} */
 				
 		
 		System.out.println("TimeBPR constructor Done");
