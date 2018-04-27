@@ -1,19 +1,30 @@
 package fashiontrend;
 
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
+import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
+
+import org.apache.commons.lang.ArrayUtils;
 
 import javafx.util.*;
 
@@ -21,6 +32,9 @@ import javafx.util.*;
 public class Corpus {
 	
 	Vector<Vote> V = new Vector<Vote>(); // vote
+	static int counter1 = 0;
+	Set<String> lst = new LinkedHashSet<>();
+	static Map<String, Integer> imgAsins = new HashMap<String, Integer>();
 	
 	int nUsers = 0; // Number of users
 	int nItems = 0; // Number of users
@@ -52,67 +66,9 @@ public class Corpus {
 	private void loadVotes(String reviewPath, String imgFeatPath, int userMin, int itemMin) throws IOException 
 	{
 		System.out.println("Inside loadVotes() in Corpus");
-         Map<String, Integer> imgAsins = new HashMap<String, Integer>();
-         int counter = 0;
- 	    
- 	        
-	    try {
-	    	
-	    	  File imageFile = new File(imgFeatPath);
-		      DataInputStream dis = new DataInputStream(new FileInputStream(imageFile)); //to read the file
-		      byte[] b = new byte[(int)imageFile.length()]; //to store the bytes
-		      int l = dis.read(b); //stores the bytes in b
-		      System.out.println("Length = " + l);
-		      
-		      byte[] temp = new byte[10];
-		      List<String> asinList = new ArrayList<String>();
-		      
-		      
-		      for (int i=0;i<b.length; i++) {
-		    	  
-		    	  if(b[i] == 66) {
-		    		  if (b[i+1] == 48 && b[i+2] == 48) {
-		    			  int k = 0;
-		    			  for (int j=i; j<i+10; j++) {
-		    				  temp[k] = b[j];
-		    				  k++;
-		    			  }
-		    			
-		    			  if (checkAscii(temp)) {
-		    				  //asinList.add(new String(temp));
-		    				  imgAsins.put(new String(temp), 1);
-		    				  counter ++;
-		    			  }
-		    			  
-		    		  }
-		    	  }
-		    	  
-		    	  else if((48 < b[i]) && (b[i] < 58)) {
-		    		  
-		    			  int k = 0;
-		    			  for (int j=i; j<i+10; j++) {
-		    				  temp[k] = b[j];
-		    				  k++;
-		    			  }
-		    			  
-		    			  if (checkISBN(temp)) {
-		    				  //asinList.add(new String(temp));
-		    				  imgAsins.put(new String(temp), 1);
-		    				  counter ++;
-		    			  }
-		    			  
-		    	  }
-		    	 
-		    	 
-		      }
-		      System.out.println("Count = " + counter);
-		      
-		      
-		      dis.close();
-		    } catch (IOException e) {
-		      e.printStackTrace(System.err);
-		    }
+		readImgPath(imgFeatPath);	
 		
+		System.out.println("Loading votes from " + reviewPath + "userMin = " + userMin + "itemMin = " + itemMin);
 	    
 		String uName; // User name
 		String bName; // Item name
@@ -139,14 +95,10 @@ public class Corpus {
 		}
 		
 		while ((line = br.readLine()) != null) {
-			//System.out.println(line);
 			Object[] token = line.split(" ");
 			uName = (String)token[0];
 			bName = (String)token[1];
 	        value = Float.valueOf((String)token[2]);
-	        //System.out.print(uName + " ");
-	        //System.out.print(bName + " ");
-	        //System.out.println(value);
 	        
 	        nRead++;
 	        
@@ -155,7 +107,7 @@ public class Corpus {
 			}
 	        
 	        if (!imgAsins.containsKey(bName)) {
-				continue;  // Do we need this continue statement
+				continue;
 			}
 	        
 	        if (value > 5 || value < 0) { // Ratings should be in the range [0,5]
@@ -182,7 +134,6 @@ public class Corpus {
 			
 			
 			// Re-read
-			
 			
 			
 			Vector<Vector<Double> > ratingPerItem = new Vector<Vector<Double>>();
@@ -265,6 +216,81 @@ public class Corpus {
 		
 	}
 	
+	private void readImgPath(String imgFeatPath) {
+		System.out.println("Pre-loading image asins from " + imgFeatPath);
+ 	    
+	    try {
+	    	
+	    	BufferedInputStream in = new BufferedInputStream(new FileInputStream(imgFeatPath));
+	    	    byte[] bbuf = new byte[2000*2000];
+	    	    int len; 
+	    	    byte[] ret;
+	    	    
+	    	    while ((len = in.read(bbuf)) != -1) {
+	    	    	ret = processBytesArray(bbuf);
+	    	    }
+	    	    	
+	    } catch (Exception e) {
+					e.printStackTrace();
+				}
+	    	
+	    counter1 = imgAsins.size();
+	    System.out.println("Counter size: " + counter1);
+	    System.out.println("Map size: " + imgAsins.size());
+		
+	}
+	
+	private byte[] processBytesArray(byte[] bbuf) {
+		
+		int len = bbuf.length;
+		byte[] temp1 = new byte[10];
+		byte[] temp2 = null;
+		
+		for (int i=0; i<len; i++) {
+    		
+    		if (len-i > 9) {
+    		if (bbuf[i] == 66 && bbuf[i+1] == 48 && bbuf[i+2] == 48) {
+    			int k = 0;
+    			  for (int j=i; j<i+10; j++) {
+    				  temp1[k] = bbuf[j];
+    				  k++;
+    			  }
+    			
+    			  if (checkAscii(temp1)) {
+    				  imgAsins.put(new String(temp1), 1);
+    			  }
+    	} 
+    		else if ((47 < bbuf[i]) && (bbuf[i] < 58)) {
+    			int k = 0;
+  			  for (int j=i; j<i+10; j++) {
+  				  temp1[k] = bbuf[j];
+  				  k++;
+  			  }
+  			  
+  			  if (checkISBN(temp1)) {
+  				imgAsins.put(new String(temp1), 1);
+  			  }
+    		}
+    	}
+    		else {
+    			
+    			int p = 0;
+    			temp2 = new byte[len-i];
+    			  for (int z=i; z<len; z++) {
+    				  temp2[p] = bbuf[z];
+    				  p++;
+    			  }
+    			  
+    			  break;
+    		}	    	    		
+	    			  
+    	}
+		
+		//System.out.println("Tot cnt for bbuf length : " + len + " is " + counter1);
+		temp1 = null;
+		return temp2;
+	}
+
 	private void generateVotes(Map<Pair<Integer, Integer>, Long> voteMap)
 	{
 		System.out.println("Inside generateVotes() in Corpus");
@@ -288,6 +314,8 @@ public class Corpus {
 		System.out.println("Inside loadImgFeatures() in Corpus");
 		Vector<Vector<Pair<Integer, Float>> > imageFeatures = new Vector<Vector<Pair<Integer,Float>>>();
 		
+		System.out.println("Loading image features from  " + imgFeatPath);
+		
 		for (int i = 0; i < nItems; i ++) {
 			Vector<Pair<Integer, Float> > vec = new Vector<Pair<Integer,Float>>();
 			imageFeatures.add(vec);
@@ -295,73 +323,67 @@ public class Corpus {
 		
 		double ma = 58.388599; // Largest feature observed
 		
-		try {
-	    	  
-	    	  File imageFile = new File(imgFeatPath);
-		      DataInputStream dis = new DataInputStream(new FileInputStream(imageFile)); //to read the file
-		      byte[] b = new byte[(int)imageFile.length()]; //to store the bytes
-		      int l = dis.read(b); //stores the bytes in b
-		      System.out.println("Length = " + l);
-		      int counter = 0;
-		      
-		      byte[] temp = new byte[10];
-		      float[] feat = new float[imFeatureDim];
-		      
-		     // while(dis.available() >0 ) {
-		      for (int i=0;i<b.length; i++) {
-		    	  
-		    	  if(b[i] == 66) {
-		    		  if (b[i+1] == 48 && b[i+2] == 48) {
-		    			  int k = 0;
-		    			  for (int j=i; j<i+10; j++) {
-		    				  temp[k] = b[j];
-		    				  k++;
-		    			  }
-		    			  
-		    			  if (checkAscii(temp)) {
-		    				  if (!itemIds.containsKey(new String(temp))) {
-		    					  continue;	
-		    				  } else {
-		    					    Vector<Pair<Integer, Float>> vec = imageFeatures.elementAt(itemIds.get(new String(temp)));
-		    						for (int f = 0; f < imFeatureDim; f ++) {
-		    							if (feat[f] != 0) { //@@@@ TODO read data in feat[f]
-		    								System.out.println("feat fffffff");
-		    								vec.add(new Pair(f, feat[f]/ma));
-		    							}
-		    						} 
-		    				  }
-		    				  counter++;
-		    			  }
-		    		  }
-		    	  }
-		    	  
-		    	  else if((48 < b[i]) && (b[i] < 58)) {
-		    		  
-		    			  int k = 0;
-		    			  for (int j=i; j<i+10; j++) {
-		    				  temp[k] = b[j];
-		    				  k++;
-		    			  }
-		    			  
-		    			  if (checkISBN(temp)) {
-		    				  if (!itemIds.containsKey(new String(temp))) {
-			    					 continue;
-		    					  
-			    			}
-		    				  counter++;	 
-		    		  }
-		    			  
-		    	  }
-		    	 
-		      }
-		//}
-		      System.out.println("Count = " + counter);
-		      
-		      
-		      dis.close();
-		    } catch (IOException e) {
-		      e.printStackTrace(System.err);
-		    }
+        try {
+	    	
+	    	BufferedInputStream bin = new BufferedInputStream(new FileInputStream(imgFeatPath));
+	    	    byte[] bbuf = new byte[2000*2000];
+	    	    byte[] temp1 = new byte[10];
+	    	    float[] feat = new float [imFeatureDim];
+	    	    int len; 
+	    	    byte[] ret;
+	    	    String sAsin = "";
+	    	    
+	    	    while ((len = bin.read(bbuf)) != -1) {
+	    	    	
+	    	    	for (int i=0; i<len; i++) {
+	    	    		
+	    	    		if (len-i > 9) {
+	    	    		if (bbuf[i] == 66 && bbuf[i+1] == 48 && bbuf[i+2] == 48) {
+	    	    			int k = 0;
+	    	    			  for (int j=i; j<i+10; j++) {
+	    	    				  temp1[k] = bbuf[j];
+	    	    				  k++;
+	    	    			  }
+	    	    			  sAsin = new String(temp1); 
+	    	    			  if (!itemIds.containsKey(sAsin)) {
+	  	    	    			continue;
+	  	    	    		  }
+	    	    			  Vector<Pair<Integer, Float> > ampvec = imageFeatures.elementAt(itemIds.get(sAsin));
+	    	    			  for (int f = 0; f < imFeatureDim; f ++) {
+	    	    					if (feat[f] != 0) {  // compression
+	    	    						ampvec.add(new Pair(f, feat[f]/ma));
+	    	    					}
+	    	    				}
+	    	    			
+	    	    	  } 
+	    	    		else if ((47 < bbuf[i]) && (bbuf[i] < 58)) {
+	    	    			int k = 0;
+	    	  			  for (int j=i; j<i+10; j++) {
+	    	  				  temp1[k] = bbuf[j];
+	    	  				  k++;
+	    	  			  }
+	    	  			sAsin = new String(temp1); 
+  	    			  if (!itemIds.containsKey(sAsin)) {
+	    	    			continue;
+	    	    		  }
+  	    			  Vector<Pair<Integer, Float> > ampvec = imageFeatures.elementAt(itemIds.get(sAsin));
+  	    			  for (int f = 0; f < imFeatureDim; f ++) {
+  	    					if (feat[f] != 0) {  // compression
+  	    						ampvec.add(new Pair(f, feat[f]/ma));
+  	    					}
+  	    				}
+	    	    		}
+	    	    		
+	    	    	}
+	    	    			    	    		
+	    		    			  
+	    	    	}
+	    	    	
+	    	    }
+	    	    	
+	    } catch (Exception e) {
+					e.printStackTrace();
+				}
 		
 				
 	}
@@ -375,6 +397,7 @@ public class Corpus {
 			}
 			else {
 				isAscii = false;
+				break;
 			}
 		}
 		
@@ -384,16 +407,17 @@ public class Corpus {
 	private boolean checkISBN(byte[] c) {
 		boolean isAscii = false;
 		for (int i = 0; i < c.length; i++) {
-			if ((i == 0) && ((48 < c[i]) && (c[i] < 58))) {
+			if ((i != 9) && (47 < c[i]) && (c[i] < 58)) {
 				isAscii = true;
 			}
-			else if ((i > 0) && ((47 < c[i]) && (c[i] < 58))) {
+			else if ((i == 9) && (((47 < c[i]) && (c[i] < 58)) || (c[i] == 88))) {
 				isAscii = true;
 			}
 			else {
 				isAscii = false;
 				break;
 			}
+			
 		}
 		
 		return isAscii;
