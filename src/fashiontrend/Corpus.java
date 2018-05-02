@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -219,15 +220,31 @@ public class Corpus {
 	private void readImgPath(String imgFeatPath) {
 		System.out.println("Pre-loading image asins from " + imgFeatPath);
  	    
-	    try {
+try {
 	    	
 	    	BufferedInputStream in = new BufferedInputStream(new FileInputStream(imgFeatPath));
+	    	
+	    	ByteBuffer bb;
 	    	    byte[] bbuf = new byte[2000*2000];
 	    	    int len; 
-	    	    byte[] ret;
+	    	    byte[] ret = null;
+	    	    byte[] result = null;
 	    	    
 	    	    while ((len = in.read(bbuf)) != -1) {
-	    	    	ret = processBytesArray(bbuf);
+	    	    	if(ret != null) {
+	    	    		//System.out.println(new String(ret));
+	    	    		bb = ByteBuffer.allocate(ret.length + bbuf.length);
+	    	    		bb.put(ret);
+	    	    		bb.put(bbuf);
+	    	    		result = bb.array();
+	    	    	}
+	    	    	
+	    	    	if(ret != null) {
+	    	    		ret = processBytesArray(result);
+	    	    	} else {
+	    	    		ret = processBytesArray(bbuf);
+	    	    	}
+	    	    	
 	    	    }
 	    	    	
 	    } catch (Exception e) {
@@ -286,7 +303,6 @@ public class Corpus {
 	    			  
     	}
 		
-		//System.out.println("Tot cnt for bbuf length : " + len + " is " + counter1);
 		temp1 = null;
 		return temp2;
 	}
@@ -296,7 +312,6 @@ public class Corpus {
 		System.out.println("Inside generateVotes() in Corpus");
 		
 		for (Map.Entry<Pair<Integer, Integer>, Long> entry : voteMap.entrySet()) {
-            //System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
             Vote v = new Vote();
 			v.setUser(entry.getKey().getKey());
 			v.setItem(entry.getKey().getValue());
@@ -350,7 +365,7 @@ public class Corpus {
 	  	    	    		  }
 	    	    			  Vector<Pair<Integer, Float> > ampvec = imageFeatures.elementAt(itemIds.get(sAsin));
 	    	    			  for (int f = 0; f < imFeatureDim; f ++) {
-	    	    					if (feat[f] != 0) {  // compression
+	    	    					if (feat[f] != 0) { 
 	    	    						ampvec.add(new Pair(f, feat[f]/ma));
 	    	    					}
 	    	    				}
